@@ -1,0 +1,31 @@
+Simulators
+
+https://123d.circuits.io/
+http://fritzing.org/home/
+http://www.virtualbreadboard.com/
+
+http://arduino.stackexchange.com/questions/61/can-i-program-for-arduino-without-having-a-real-board
+http://www.intorobotics.com/arduino-tools-resources-need-know/
+
+Usb Host Shield
+
+https://www.circuitsathome.com/mcu/how-to-drive-usb-keyboard-from-arduino
+https://www.circuitsathome.com/mcu/programming/arduino-usb-host-part-4-peripherals
+https://github.com/felis/USB_Host_Shield
+
+http://hardwarefun.com/tutorials/using-usb-host-shield-with-arduino
+
+Teensy
+https://www.pjrc.com/teensy/td_libs_USBHostShield.html
+
+Usb Keyboard
+https://github.com/coopermaa/USBKeyboard
+
+http://mitchtech.net/arduino-usb-hid-keyboard/
+https://www.arduino.cc/en/Hacking/DFUProgramming8U2
+http://forum.arduino.cc/index.php?topic=135623.0
+
+http://hackaday.com/2012/06/29/turning-an-arduino-into-a-usb-keyboard/
+
+V-Usb
+https://www.obdev.at/products/vusb/download.html
