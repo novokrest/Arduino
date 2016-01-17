@@ -8,14 +8,18 @@
 class Blinker
 {
     int led_;
-    int highMs_;
-    int lowMs_;
+	int status_;
     
+	void setStatus(int status);
+
 public:
     Blinker();
-    Blinker(int led);
     
     void blink();
+	void error();
+
+	void turnLightOn();
+	void turnLightOff();
 };
 
 #endif //__BLINKER__

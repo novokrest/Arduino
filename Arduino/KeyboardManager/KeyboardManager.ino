@@ -1,6 +1,7 @@
 /* MAX3421E USB Host controller LCD/keyboard demonstration */
 #include <Max3421e.h>
 #include <Usb.h>
+#include <Blinker.h>
 
 /* keyboard data taken from configuration descriptor */
 #define KBD_ADDR        1
@@ -75,6 +76,7 @@ byte HIDtoA( byte HIDbyte, byte mod );
 
 MAX3421E Max;
 USB Usb;
+Blinker blinker;
 
 void setup() 
 {

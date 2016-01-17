@@ -1,6 +1,7 @@
 /* MAX3421E USB Host controller LCD/keyboard demonstration */
 #include <Max3421e.h>
 #include <Usb.h>
+#include "HidConverter.h"
 
 /* keyboard data taken from configuration descriptor */
 #define KBD_ADDR        1
@@ -74,16 +75,33 @@ bool buf_compare( byte data );
 byte HIDtoA( byte HIDbyte, byte mod );
 void blink_error();
 void releaseKey();
+byte HIDtoA( byte HIDbyte, byte mod );
 
 MAX3421E Max;
 USB Usb;
 
-void setup() 
+class KeyboardSimulator
 {
+  public:
+  void Init() {
   pinMode(13, OUTPUT);
   Serial.begin( 9600 );
   Max.powerOn();
   delay( 200 );
+
+  }
+};
+
+KeyboardSimulator keyboardSimulator;
+HidStringConverter hidConverter;
+void setup() 
+{
+    keyboardSimulator.Init();
+  
+//  pinMode(13, OUTPUT);
+//  Serial.begin( 9600 );
+//  Max.powerOn();
+//  delay( 200 );
 }
 
 void loop() 
@@ -160,11 +178,15 @@ void kbd_poll()
             leds = ( scrollLock ) ? leds |= bmSCROLLLOCK : leds &= ~bmSCROLLLOCK;   // set or clear bit 2 of LED report byte
             break;  
           default:
+          //Serial.print(HIDtoA( buf[ i ], buf[ 0 ] ));
+          String s = hidConverter.Convert(buf[i], buf[0]);
+          //s = "hi";
+          Serial.print(s);
             break;
         }
         rcode = Usb.setReport( KBD_ADDR, 0, 1, KBD_IF, 0x02, 0, &leds );
         if( rcode ) {
-          blink_error();
+          //blink_error();
         }
       }
     }
@@ -173,8 +195,140 @@ void kbd_poll()
       old_buf[ i ] = buf[ i ];
     }
 
-    Serial.write(buf, 8); // Send keypress
-    releaseKey();
+    //Serial.write(buf, 8); // Send keypress
+    //releaseKey();
+}
+
+byte HIDtoA( byte HIDbyte, byte mod )
+{
+  /* upper row of the keyboard, numbers and special symbols */
+  if( HIDbyte >= 0x1e && HIDbyte <= 0x27 ) {
+    if(( mod & SHIFT ) || numLock ) {    //shift key pressed
+      switch( HIDbyte ) {
+        case BANG:  return( 0x21 );
+        case AT:    return( 0x40 );
+        case POUND: return( 0x23 );
+        case DOLLAR: return( 0x24 );
+        case PERCENT: return( 0x25 );
+        case CAP: return( 0x5e );
+        case AND: return( 0x26 );
+        case STAR: return( 0x2a );
+        case OPENBKT: return( 0x28 );
+        case CLOSEBKT: return( 0x29 );
+      }//switch( HIDbyte...
+    }
+    else {                  //numbers
+      if( HIDbyte == 0x27 ) {  //zero
+        return( 0x30 );
+      }
+      else {
+        return( HIDbyte + 0x13 );
+      }
+    }//numbers
+  }//if( HIDbyte >= 0x1e && HIDbyte <= 0x27
+  /**/
+  /* number pad. Arrows are not supported */
+  if(( HIDbyte >= 0x59 && HIDbyte <= 0x61 ) && ( numLock == true )) {  // numbers 1-9
+    return( HIDbyte - 0x28 );
+  }
+  if(( HIDbyte == 0x62 ) && ( numLock == true )) {                      //zero
+    return( 0x30 );
+  }
+  /* Letters a-z */
+  if( HIDbyte >= 0x04 && HIDbyte <= 0x1d ) {
+    if((( capsLock == true ) && ( mod & SHIFT ) == 0 ) || (( capsLock == false ) && ( mod & SHIFT ))) {  //upper case
+      return( HIDbyte + 0x3d );
+    }
+    else {  //lower case
+      return( HIDbyte + 0x5d );
+    }
+  }//if( HIDbyte >= 0x04 && HIDbyte <= 0x1d...
+  /* Other special symbols */
+  if( HIDbyte >= 0x2c && HIDbyte <= 0x38 ) {
+    switch( HIDbyte ) {
+      case SPACE: return( 0x20 ); 
+      case HYPHEN:
+        if(( mod & SHIFT ) == false ) {
+         return( 0x2d );
+        }
+        else {
+          return( 0x5f );
+        }
+      case EQUAL:
+       if(( mod & SHIFT ) == false ) {
+        return( 0x3d );
+       }
+       else {
+        return( 0x2b );
+       }
+       case SQBKTOPEN:
+         if(( mod & SHIFT ) == false ) {
+          return( 0x5b );
+         }
+         else {
+          return( 0x7b );
+         }
+       case SQBKTCLOSE:
+         if(( mod & SHIFT ) == false ) {
+          return( 0x5d );
+         }
+         else {
+          return( 0x7d );
+         } 
+       case BACKSLASH:
+         if(( mod & SHIFT ) == false ) {
+           return( 0x5c );
+         }
+         else {
+           return( 0x7c );
+         }
+       case SEMICOLON:
+         if(( mod & SHIFT ) == false ) {
+           return( 0x3b );
+         }
+         else {
+           return( 0x3a );
+         }
+      case INVCOMMA:
+        if(( mod & SHIFT ) == false ) {
+          return( 0x27 );
+        }
+        else {
+          return( 0x22 );
+        }
+      case TILDE:  
+        if(( mod & SHIFT ) == false ) {
+          return( 0x60 );
+        }
+        else {
+          return( 0x7e );
+        }
+      case COMMA:   
+        if(( mod & SHIFT ) == false ) {
+          return( 0x2c );
+        }
+        else {
+          return( 0x3c );
+        }
+      case PERIOD:
+        if(( mod & SHIFT ) == false ) {
+          return( 0x2e );
+        }
+        else {
+          return( 0x3e );
+        }
+      case FRONTSLASH:
+        if(( mod & SHIFT ) == false ) {
+          return( 0x2f );
+        }
+        else {
+          return( 0x3f );
+        }
+      default:
+        break;
+    }//switch( HIDbyte..
+  }//if( HIDbye >= 0x2d && HIDbyte <= 0x38..
+  return( 0 );
 }
 
 void releaseKey() 
