@@ -26,9 +26,9 @@ function install_firmware {
     sudo dfu-programmer $CHIP reset
 }
 
-ROOT=.
-ORIGINAL_FIRMWARE=$ROOT/Arduino-usbserial-uno.hex
-KEYBOARD_FIRMWARE=$ROOT/Arduino-keyboard-0.3.hex
+FIRMWARE_ROOT=../Arduino/firmware
+ORIGINAL_FIRMWARE=$FIRMWARE_ROOT/Arduino-usbserial-uno.hex
+KEYBOARD_FIRMWARE=$FIRMWARE_ROOT/Arduino-keyboard-0.3.hex
 
 echo "Go to DFU mode and press ENTER [press 'q' for exit]"
 read_answer
