@@ -3,7 +3,9 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    DesCryptor.cpp
 
-HEADERS +=
+HEADERS += \
+    DesCryptor.h
 
