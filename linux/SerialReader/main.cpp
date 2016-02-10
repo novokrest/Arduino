@@ -137,7 +137,31 @@ static int DecryptMessage(const char buf[8], char outbuf[8],const char key[8])
     return -1;
 }
 
-int main()
+static int WriteSerialPortSymbol(int fd, char symbol)
+{
+    int attempts = 0, count;
+    do {
+        count = write(fd, &symbol, sizeof(symbol));
+        if (count == sizeof(symbol)) {
+            return 0;
+        }
+    }
+    while(attempts++ < 3);
+    return -1;
+}
+
+static int WriteStartMessage(int fd, std::string const &message)
+{
+    for (size_t i = 0, len = message.length(); i < len; ++i) {
+        if (WriteSerialPortSymbol(fd, message.at(i)) == -1) {
+            return -1;
+        }
+        usleep(1000);
+    }
+    return 0;
+}
+
+int tmain()
 {
     int arduino = OpenSerialPort(ARDUINO_SERIAL_PORT);
     std::cout << "Arduino '" << ARDUINO_SERIAL_PORT << "' has been opened" << std::endl;
@@ -146,6 +170,22 @@ int main()
         return -1;
     }
     std::cout << "Arduino has been configured successfully" << std::endl;
+
+    while(true) {
+        if (WriteSerialPortSymbol(arduino, 131) < 0) {
+            std::cout << "Fail" << std::endl;
+        }
+        else {
+//            char symbol;
+//            ReadSerialPort(arduino, &symbol);
+            //std::cout << "Success: " << (int)symbol << std::endl;
+        }
+    }
+
+    if (WriteStartMessage(arduino, "ubuntu") < 0) {
+        std::cout << "Fail to write start message" << std::endl;
+    }
+    std::cout << "Start message has been sent successfully" << std::endl;
 
     char buf[8];
     if (ReadMessage(arduino, buf) < 0) {
@@ -173,5 +213,29 @@ int main()
     std::cout << std::endl;
 
     return 0;
+}
+
+#include "ArduinoCommunicator.h"
+#include "Keyboard.h"
+#include "Tests.h"
+
+
+int main()
+{
+    Tests::RunTests();
+
+    ArduinoCommunicator communicator;
+    Keyboard keyboard;
+
+    try
+    {
+        keyboard.SubscribeOn(communicator);
+        communicator.Run();
+    }
+    catch (const std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+
 }
 
