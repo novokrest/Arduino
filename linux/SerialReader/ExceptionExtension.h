@@ -2,6 +2,7 @@
 #define EXCEPTIONEXTENSION_H
 
 #include <string>
+#include <sstream>
 
 class ExceptionWithMessage : public std::exception
 {
@@ -22,6 +23,17 @@ class ExceptionExtension
 public:
     static void ThrowExceptionIfFalse(bool b, const std::string& message);
     static void ThrowExceptionIfNotEqual(char a, char b, const std::string& message);
+
+    template<typename T>
+    static void ThrowExceptionIfNotEqual(T a, T b, const std::string& message)
+    {
+        std::stringstream ssError;
+        ssError << message
+                << ". Expected: '" << a << "'"
+                << ", actual: '" << b << "'";
+        ThrowExceptionIfFalse(a == b, ssError.str());
+    }
+
     static void ThrowErrnoException();
     static void ThrowErrnoException(const std::string& from);
     static void ThrowErrnoExceptionWithMessage(const std::string& message);

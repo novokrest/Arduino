@@ -1,6 +1,7 @@
 #include "ArduinoCommunicator.h"
 #include "ExceptionExtension.h"
 #include "SerialPort.h"
+#include "Utils.h"
 #include <fcntl.h>
 #include <unistd.h>
 #include <termios.h>
@@ -48,6 +49,8 @@ void ArduinoCommunicator::OpenArduinoSerial()
     tty.c_cflag     &=  ~CSIZE;
     tty.c_cflag     |=  CS8;
 
+    tty.c_lflag |= ICANON;
+
     tty.c_cflag     &=  ~CRTSCTS;           // no flow control
     tty.c_cc[VMIN]   =  1;                  // read doesn't block
     tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
@@ -55,6 +58,7 @@ void ArduinoCommunicator::OpenArduinoSerial()
 
     /* Make raw */
     cfmakeraw(&tty);
+
 
     /* Flush Port, then applies attributes */
     tcflush( fd, TCIFLUSH );
@@ -72,28 +76,10 @@ void ArduinoCommunicator::CloseArduinoSerial()
     }
 }
 
-
-void ArduinoCommunicator::ShakeHands()
-{
-    WriteMessage("arduino?");
-    ReadAndCheckMessage("yes");
-    WriteMessage("start");
-}
-
-void ArduinoCommunicator::StartReceivingDataLoop()
-{
-    while (true) {
-        Data data;
-        ReadData(data);
-        NotifyAboutData(data);
-    }
-}
-
-void ArduinoCommunicator::Run()
+void ArduinoCommunicator::Open()
 {
     OpenArduinoSerial();
-    ShakeHands();
-    StartReceivingDataLoop();
+    sleep(5);
 }
 
 void ArduinoCommunicator::ReadSymbol(char *symbol)
@@ -113,7 +99,7 @@ void ArduinoCommunicator::ReadSymbol(char *symbol)
 void ArduinoCommunicator::WriteSymbol(char symbol)
 {
     int count = write(fd_, &symbol, sizeof(symbol));
-    ExceptionExtension::ThrowExceptionIfFalse(count != sizeof(symbol), "Fail to write symbol");
+    ExceptionExtension::ThrowExceptionIfFalse(count == sizeof(symbol), "Fail to write symbol");
     usleep(1000);
 }
 
@@ -129,9 +115,10 @@ void ArduinoCommunicator::ReadData(Data& data)
     ReadSymbol(&symbol);
     count = (int)symbol;
 
+    data.resize(count);
     for (int i = 0; i < count; ++i) {
         ReadSymbol(&symbol);
-        data.push_back(symbol);
+        data[i] = symbol;
     }
 
     ReadSymbol(&symbol);
@@ -139,33 +126,114 @@ void ArduinoCommunicator::ReadData(Data& data)
                                                  "Failed to read data from arduino: Incorrect end key");
 }
 
-void ArduinoCommunicator::ReadAndCheckMessage(const std::string& message)
+void ArduinoCommunicator::Read(Data &data)
 {
-    char symbol;
-
-    ReadSymbol(&symbol);
-    ExceptionExtension::ThrowExceptionIfFalse(symbol == ARDUINO_START_DATA_KEY_SYMBOL, "Failed to read start key");
-
-    for (size_t i = 0, len = message.length(); i < len;) {
-        char expected = message.at(i);
-        ReadSymbol(&symbol);
-        ExceptionExtension::ThrowExceptionIfFalse(symbol == message.at(i),
-                                                  "Incorrect read symbol: expect '" + std::to_string(expected)
-                                                  + "', actual '" + std::to_string(symbol) + "'");
-    }
-
-    ReadSymbol(&symbol);
-    ExceptionExtension::ThrowExceptionIfFalse(symbol == ARDUINO_END_DATA_KEY_SYMBOL, "Failed to read end key");
+    ReadData(data);
 }
 
-void ArduinoCommunicator::WriteMessage(const std::string &message)
+void ArduinoCommunicator::WriteData(const Data &data)
 {
     WriteSymbol(ARDUINO_START_DATA_KEY_SYMBOL);
 
-    WriteSymbol((char)message.length());
-    for (size_t i = 0, len = message.length(); i < len; ++i) {
-        WriteSymbol(message.at(i));
+    WriteSymbol((char)data.size());
+    for (size_t i = 0, len = data.size(); i < len; ++i) {
+        WriteSymbol(data.at(i));
     }
 
     WriteSymbol(ARDUINO_END_DATA_KEY_SYMBOL);
+}
+
+void ArduinoCommunicator::Write(const Data &data)
+{
+    WriteData(data);
+}
+
+
+EncryptedArduinoCommunicator::EncryptedArduinoCommunicator()
+    : communicator_(new ArduinoCommunicator()), cryptor_(new DesCryptor())
+{
+
+}
+
+EncryptedArduinoCommunicator::~EncryptedArduinoCommunicator()
+{
+    delete communicator_;
+    delete cryptor_;
+}
+
+void EncryptedArduinoCommunicator::Open()
+{
+    communicator_->Open();
+}
+
+void EncryptedArduinoCommunicator::Read(Data &data)
+{
+    Data encryptedData;
+
+    communicator_->Read(encryptedData);
+    cryptor_->Decrypt(encryptedData, data);
+}
+
+void EncryptedArduinoCommunicator::Write(const Data &data)
+{
+    Data encryptedData;
+
+    cryptor_->Encrypt(data, encryptedData);
+    communicator_->Write(encryptedData);
+}
+
+
+ArduinoSession::ArduinoSession()
+    : communicator_(new EncryptedArduinoCommunicator())
+{
+
+}
+
+ArduinoSession::~ArduinoSession()
+{
+    delete communicator_;
+}
+
+void ArduinoSession::WriteMessage(const std::string &message)
+{
+    Data data = Utils::ToData(message);
+    communicator_->Write(data);
+}
+
+std::string ArduinoSession::ReadMessage()
+{
+    Data data;
+    communicator_->Read(data);
+    std::string str = Utils::ToCharString(data);
+    return str;
+}
+
+void ArduinoSession::ReadAndCheckMessage(const std::string &expected)
+{
+    std::string received = ReadMessage();
+    ExceptionExtension::ThrowExceptionIfNotEqual(expected, received, "Incorrect answer from arduino");
+}
+
+void ArduinoSession::ShakeHands()
+{
+    WriteMessage("arduino?");
+    ReadAndCheckMessage("yes");
+    WriteMessage("start");
+    ReadAndCheckMessage("OK");
+}
+
+void ArduinoSession::StartLoop()
+{
+    while (true) {
+        Data data;
+        communicator_->Read(data);
+        NotifyAboutData(data);
+    }
+}
+
+void ArduinoSession::Run()
+{
+    communicator_->Open();
+    ShakeHands();
+    StartLoop();
 }

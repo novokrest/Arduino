@@ -2,12 +2,17 @@
 #include "Utils.h"
 #include "Keyboard.h"
 #include "ArduinoCommunicator.h"
+#include "DesCryptor.h"
 
 void Tests::RunTests()
 {
     UtilsTests::ToStringTest();
+    UtilsTests::ToCharStringTest();
+    UtilsTests::ToDataTest();
+
     KeyboardTests::NotifyAboutDataTest();
     KeyboardNotificationTest();
+    DesCryptorTester::DecryptEncryptTest();
 }
 
 void Tests::KeyboardNotificationTest()

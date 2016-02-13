@@ -9,7 +9,8 @@ Keyboard::Keyboard()
 
 void Keyboard::NotifyAboutData(const Data &data)
 {
-    std::cout << "Keyboard: " << Utils::ToString(data) << std::endl;
+    std::cout << "Keyboard: " << Utils::ToCharString(data)
+              << " ( " << Utils::ToString(data) << " )" << std::endl;
 }
 
 void KeyboardTests::NotifyAboutDataTest()

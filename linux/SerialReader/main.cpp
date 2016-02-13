@@ -176,8 +176,8 @@ int tmain()
             std::cout << "Fail" << std::endl;
         }
         else {
-//            char symbol;
-//            ReadSerialPort(arduino, &symbol);
+            //            char symbol;
+            //            ReadSerialPort(arduino, &symbol);
             //std::cout << "Success: " << (int)symbol << std::endl;
         }
     }
@@ -219,23 +219,152 @@ int tmain()
 #include "Keyboard.h"
 #include "Tests.h"
 
-
-int main()
+void main1()
 {
     Tests::RunTests();
 
     ArduinoCommunicator communicator;
     Keyboard keyboard;
 
+    //    communicator.OpenArduinoSerial();
+    //    communicator.WriteMessage("H");
+    //    communicator.WriteMessage("Hello");
+    //    communicator.WriteMessage("Hello");
+    //    communicator.WriteMessage("Hello");
+    //    communicator.WriteMessage("Hello");
+
     try
     {
-        keyboard.SubscribeOn(communicator);
-        communicator.Run();
+        //keyboard.SubscribeOn(communicator);
+        //communicator.Run();
     }
     catch (const std::exception& e)
     {
         std::cout << e.what() << std::endl;
     }
 
+}
+
+void main2()
+{
+    ArduinoSession session;
+    Keyboard keyboard;
+
+    try {
+        keyboard.SubscribeOn(session);
+        session.Run();
+    }
+    catch (const std::exception& e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+
+}
+
+void main3()
+{
+    ArduinoCommunicator communicator;
+    Keyboard keyboard;
+    Data data;
+
+    communicator.Open();
+    communicator.Read(data);
+
+    keyboard.NotifyAboutData(data);
+
+    DesCryptor cryptor;
+    Data encrypted, decrypted;
+
+    Data data1 = {'a', 'r', 'd', 'u', 'i', 'n', 'o', '?', '!'};
+    cryptor.Encrypt(data1, encrypted);
+    cryptor.Decrypt(encrypted, decrypted);
+
+
+    data.clear();
+    communicator.Read(data);
+    keyboard.NotifyAboutData(data);
+}
+
+#include "Utils.h"
+void main4()
+{
+    DesCryptor cryptor;
+    ArduinoCommunicator communicator;
+    Data data = Utils::ToData("abcdefghj");
+    Data received, encrypted, decrypted;
+
+    cryptor.Encrypt(data, encrypted);
+
+    communicator.Open();
+    communicator.Write(encrypted);
+//    communicator.WriteSymbol((char)131);
+//    communicator.WriteSymbol(encrypted.size());
+//    for (size_t i = 0; i < encrypted.size(); ++i) {
+//        communicator.WriteSymbol(encrypted.at(i));
+//    }
+//    communicator.WriteSymbol((char)131);
+    communicator.Read(received);
+
+    cryptor.Decrypt(encrypted, decrypted);
+
+    int i = 0;
+}
+
+void SerialTest()
+{
+    ArduinoCommunicator communicator;
+    char symbol, received;
+
+    communicator.Open();
+    symbol = 0;
+    while(true) {
+        communicator.WriteSymbol(symbol);
+        communicator.ReadSymbol(&received);
+        if (symbol == received) {
+            std::cout << "OK: " << (int)(unsigned char)symbol << std::endl;
+        }
+        else {
+            std::cout << "Error! Sent: " << (int)(unsigned char)symbol << ", received: " << (int)(unsigned char)received << std::endl;
+        }
+        ++symbol;
+    }
+}
+
+void CommunicatorTest()
+{
+    ArduinoCommunicator communicator;
+    Data data(1), received(1);
+    char symbol = 0;
+
+    communicator.Open();
+    while(true) {
+        data[0] = symbol;
+        communicator.Write(data);
+        communicator.Read(received);
+        if (data == received) {
+            std::cout << "OK: " << Utils::ToString(data) << std::endl;
+        }
+        else {
+            std::cout << "Error! Sent: " << Utils::ToString(data)
+                      << ", received: " << Utils::ToString(received) << std::endl;
+        }
+        ++symbol;
+    }
+}
+
+int main()
+{
+    Tests::RunTests();
+
+    //try
+    {
+        main2();
+    }
+    //catch (const std::exception& e)
+    {
+    //    std::cout << e.what() << std::endl;
+    }
+
+    return 0;
 }
 

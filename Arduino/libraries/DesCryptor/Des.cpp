@@ -25,10 +25,10 @@
  * \license	 GPLv3 or later
  * 
  */
+#include <Des.h>
 #include <stdint.h>
 #include <string.h>
 #include <avr/pgmspace.h>
-#include <Des.h>
 
 void des_enc(void* out, const void* in, const void* key);
 void des_dec(void* out, const void* in, const void* key);
@@ -337,7 +337,7 @@ void des_enc(void* out, const void* in, const void* key){
 
 /******************************************************************************/
 
-void des_dec(void* out, const void* in, const uint8_t* key){
+void des_dec(void* out, const void* in, const void* key){
 	uint8_t kr[6],k[7];
 	union {
 		uint8_t v8[8];
