@@ -2,6 +2,7 @@
 #include <Max3421e.h>
 #include <Usb.h>
 #include <Blinker.h>
+#include "Utils.h"
 
 /* keyboard data taken from configuration descriptor */
 #define KBD_ADDR        1
@@ -74,16 +75,29 @@ void kbd_poll();
 bool buf_compare( byte data );
 byte HIDtoA( byte HIDbyte, byte mod );
 
-MAX3421E Max;
-USB Usb;
+
 Blinker blinker;
+
+class KeyboardManager1
+{
+  USB Usb;
+  MAX3421E Max;
+
+  public:
+  KeyboardManager1()
+  {
+      Max.powerOn();
+  }
+  void StartLoop();
+  void InitKeyboard();
+  void PollKeyboard();
+};
 
 void setup() 
 {
   // set up the LCD's number of rows and columns: 
   Serial.begin( 9600 );
   Serial.println("Start");
-  Max.powerOn();
   delay( 200 );
 }
 
@@ -91,19 +105,61 @@ void bla(){}
 
 void loop() 
 {
-    Max.Task();
-    Usb.Task();
-    if( Usb.getUsbTaskState() == USB_STATE_CONFIGURING ) {  //wait for addressing state
-        kbd_init();
-        Usb.setUsbTaskState( USB_STATE_RUNNING );
-    }
-    if( Usb.getUsbTaskState() == USB_STATE_RUNNING ) {  //poll the keyboard  
-        kbd_poll();
+  KeyboardManager1 kmanager;
+  kmanager.StartLoop();
+//    Max.Task();
+//    Usb.Task();
+//    if( Usb.getUsbTaskState() == USB_STATE_CONFIGURING ) {  //wait for addressing state
+//        //kbd_init();
+//        kmanager.InitKeyboard();
+//        Usb.setUsbTaskState( USB_STATE_RUNNING );
+//    }
+//    if( Usb.getUsbTaskState() == USB_STATE_RUNNING ) {  //poll the keyboard  
+//        //kbd_poll();
+//        kmanager.PollKeyboard();
+//    }
+}
+
+void RepeatedBlink(byte count)
+{
+    for (byte i = 0; i < count; ++i) {
+            digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(1);              // wait for a second
+    digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+    delay(1);              // wait for a second
     }
 }
 
+void KeyboardManager1::StartLoop()
+{
+  delay(2000);
+  while(true) {
+    //Utils::ReportSpecialErrorIfFalse(false);
+//
+//            RepeatedBlink(10);
+//        delay(1500);
+//        RepeatedBlink(10);
+//        delay(1500);
+//        RepeatedBlink(10);
+//        delay(1);
+        
+    Max.Task();
+    Usb.Task();
+    if( Usb.getUsbTaskState() == USB_STATE_CONFIGURING ) {  //wait for addressing state
+        //kbd_init();
+        InitKeyboard();
+        Usb.setUsbTaskState( USB_STATE_RUNNING );
+    }
+    if( Usb.getUsbTaskState() == USB_STATE_RUNNING ) {  //poll the keyboard  
+        //kbd_poll();
+        PollKeyboard();
+    }
+  }
+}
+
 /* Initialize keyboard */
-void kbd_init() 
+//void kbd_init() 
+void KeyboardManager1::InitKeyboard()
 {
     byte rcode = 0;  //return code
 /**/
@@ -134,7 +190,8 @@ void kbd_init()
 
 /* Poll keyboard and print result */
 /* buffer starts at position 2, 0 is modifier key state and 1 is irrelevant */
-void kbd_poll()
+//void kbd_poll()
+void KeyboardManager1::PollKeyboard()
 {
     char i;
     static char leds = 0;

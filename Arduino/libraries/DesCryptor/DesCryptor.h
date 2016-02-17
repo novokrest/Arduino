@@ -1,7 +1,7 @@
 #ifndef _DES_CRYPTOR_H_
 #define _DES_CRYPTOR_H_
 
-#include "common.h"
+#include "Common.h"
 
 typedef char DesKey[8];
 typedef char DesBlock[8];

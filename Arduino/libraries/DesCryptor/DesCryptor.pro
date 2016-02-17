@@ -7,11 +7,15 @@ SOURCES += Des.cpp \
            DesCryptor.cpp \
            PcCommunicator.cpp \
     SerialManager.cpp \
-    Utils.cpp
+    Utils.cpp \
+    KeyboardManager.cpp \
+    PcSession.cpp
 
 HEADERS += Des.h \
            DesCryptor.h \
            PcCommunicator.h \
     SerialManager.h \
     Utils.h \
-    common.h
+    KeyboardManager.h \
+    PcSession.h \
+    Common.h

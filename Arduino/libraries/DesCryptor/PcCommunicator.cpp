@@ -13,7 +13,6 @@
 #define ARDUINO_END_KEY_SYMBOL    (byte)ARDUINO_END_KEY
 
 
-//TODO: implement without "const char* Read(byte *size)
 byte PcCommunicator::Read(Data& data)
 {
     byte symbol, count;
@@ -105,52 +104,4 @@ byte EncryptedPcCommunicator::Write(const Data &data)
     communicator_->Write(encryptedData);
 
     return 0;
-}
-
-
-PcSession::PcSession()
-    : communicator_(new EncryptedPcCommunicator())
-{
-
-}
-
-PcSession::~PcSession()
-{
-    delete communicator_;
-}
-
-void PcSession::ShakeHands()
-{
-    const Data question = {'a', 'r', 'd', 'u', 'i', 'n', 'o', '?'};
-    const Data answer = {'y', 'e', 's'};
-    const Data command = {'s', 't', 'a', 'r', 't'};
-    const Data confirm = {'O', 'K'};
-
-    Data data;
-
-    Utils::ReportErrorIfFalse(communicator_->Read(data) == 0);
-    Utils::ReportErrorIfFalse(data == question);
-    communicator_->Write(answer);
-
-    data.clear();
-    Utils::ReportErrorIfNotZero(communicator_->Read(data));
-    Utils::ReportErrorIfFalse(data == command);
-    communicator_->Write(confirm);
-}
-
-void PcSession::StartLoop()
-{
-    const Data fire = {'F', 'i', 'r', 'e' , '!'};
-
-    while(true) {
-        communicator_->Write(fire);
-        delay(1000);
-    }
-}
-
-void PcSession::Run()
-{
-    Utils::ReportErrorIfNotZero(communicator_->Open());
-    ShakeHands();
-    StartLoop();
 }

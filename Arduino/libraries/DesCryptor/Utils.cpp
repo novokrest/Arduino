@@ -18,7 +18,8 @@ void Utils::RepeatedBlink(byte count)
 void Utils::ReportErrorIfFalse(bool b)
 {
     if (!b) {
-        RepeatedBlink(200);
+        Serial.println("Error");
+        //RepeatedBlink(200);
     }
 }
 
@@ -37,4 +38,14 @@ void Utils::ReportSpecialErrorIfFalse(bool b)
         RepeatedBlink(10);
         delay(1500);
     }
+}
+
+bool Utils::Contain(const Data &data, byte e)
+{
+    for (byte i = 2, len = data.size(); i < len; ++i) {
+        if (e == data.at(i)) {
+            return true;
+        }
+    }
+    return false;
 }

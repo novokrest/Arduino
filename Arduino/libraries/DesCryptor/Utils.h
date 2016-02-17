@@ -1,11 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include <Arduino.h>
-#else
-#include <WProgram.h>
-#endif
+#include "Common.h"
 
 class Utils
 {
@@ -20,6 +16,8 @@ public:
     static void ReportErrorIfNotZero(byte b);
 
     static void ReportSpecialErrorIfFalse(bool b);
+
+    static bool Contain(const Data& data, byte e);
 };
 
 #endif // UTILS_H
