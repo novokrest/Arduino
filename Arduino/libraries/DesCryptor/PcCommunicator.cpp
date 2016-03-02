@@ -69,7 +69,7 @@ byte PcCommunicator::Open()
 
 
 EncryptedPcCommunicator::EncryptedPcCommunicator()
-    : communicator_(new PcCommunicator()), cryptor_(new DesCryptor())
+    : communicator_(new JustPcCommunicator()), cryptor_(new DesCryptor())
 {
 }
 

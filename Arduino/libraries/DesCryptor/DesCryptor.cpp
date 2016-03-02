@@ -41,7 +41,7 @@ void DesCryptor::Encrypt(const Data &data, Data &encryptedData)
         memcpy(&encryptedData[i], outBlock, sizeof(outBlock));
     }
 
-    encryptedData.push_back(dataSize);
+    //encryptedData.push_back(dataSize);
 }
 
 void DesCryptor::Decrypt(const Data &data, Data &decryptedData)

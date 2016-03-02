@@ -3,7 +3,7 @@
 
 
 PcSession::PcSession()
-    : communicator_(new JustPcCommunicator()), keyboardManager_(new KeyboardManager())
+    : communicator_(new EncryptedPcCommunicator()), keyboardManager_(new KeyboardManager())
 {
 
 }
