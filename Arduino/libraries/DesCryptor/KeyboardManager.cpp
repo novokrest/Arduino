@@ -60,7 +60,7 @@
 KeyboardManager::KeyboardManager()
     : numLock_(false), capsLock_(false), scrollLock_(false)
 {
-    lastKey_.resize(KEYBOARD_BUFFER_LENGTH);
+    lastKey_.resize(KEYBOARD_BUFFER_LENGTH, 0);
     max_.powerOn();
     delay(1000);
 }
@@ -97,7 +97,7 @@ byte KeyboardManager::PollKeyboard(Keys& keys)
 
     static char leds = 0;
 
-    buffer.resize(KEYBOARD_BUFFER_LENGTH);
+    buffer.resize(KEYBOARD_BUFFER_LENGTH, 0);
     rcode = usb_.inTransfer (KBD_ADDR, KBD_EP, KEYBOARD_BUFFER_LENGTH, (char*)&buffer.front());
     if (rcode != 0) {
         return -1;
@@ -133,6 +133,20 @@ byte KeyboardManager::PollKeyboard(Keys& keys)
     for(i = 2; i < KEYBOARD_BUFFER_LENGTH; ++i) {                    //copy new buffer to old
         lastKey_[i] = buffer[i];
     }
+
+    int zeros = 0;
+    for (i = 0; i < buffer.size(); ++i) {
+        if (buffer[i] == 0) {
+            ++zeros;
+        }
+    }
+    if (zeros == buffer.size()) {
+        return 0;
+    }
+
+//    if (buffer[0] == 0 && buffer[2] == 0) {
+//        return 0;
+//    }
 
     keys.push_back(buffer); /* key press */
     buffer[0] = 0;

@@ -11,6 +11,7 @@ class PcSession
     KeyboardManager *keyboardManager_;
 
     void ShakeHands();
+    void WaitMagicKeys();
     void StartLoop();
 
 public:

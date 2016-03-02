@@ -15,6 +15,14 @@ public:
     virtual byte Write(const Data& data) = 0;
 };
 
+class JustPcCommunicator : public IPcCommunicator
+{
+public:
+    byte Open() override;
+    byte Read(Data& data) override;
+    byte Write(const Data& data) override;
+};
+
 class PcCommunicator : public IPcCommunicator
 {
     void OpenPcSerial();

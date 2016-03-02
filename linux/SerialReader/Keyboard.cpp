@@ -15,7 +15,7 @@ void Keyboard::NotifyAboutData(const Data &data)
 
 void KeyboardTests::NotifyAboutDataTest()
 {
-    const Data data = {131, 80, 131};
+    const Data data = {(char)131, (char)80, (char)131};
     Keyboard keyboard;
 
     keyboard.NotifyAboutData(data);

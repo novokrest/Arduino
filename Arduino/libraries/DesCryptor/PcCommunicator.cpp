@@ -105,3 +105,23 @@ byte EncryptedPcCommunicator::Write(const Data &data)
 
     return 0;
 }
+
+
+byte JustPcCommunicator::Open()
+{
+    Serial.begin(9600);
+
+    return 0;
+}
+
+byte JustPcCommunicator::Write(const Data &data)
+{
+    SerialManager::Instance().WriteBytes(&data.front(), data.size());
+
+    return 0;
+}
+
+byte JustPcCommunicator::Read(Data &data)
+{
+    return 0;
+}

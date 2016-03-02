@@ -3,7 +3,7 @@
 
 
 PcSession::PcSession()
-    : communicator_(new EncryptedPcCommunicator()), keyboardManager_(new KeyboardManager())
+    : communicator_(new JustPcCommunicator()), keyboardManager_(new KeyboardManager())
 {
 
 }
@@ -20,6 +20,7 @@ void PcSession::ShakeHands()
     const Data answer = {'y', 'e', 's'};
     const Data command = {'s', 't', 'a', 'r', 't'};
     const Data confirm = {'O', 'K'};
+    const Data fire = {'F', 'i', 'r', 'e' , '!'};
 
     Data data;
 
@@ -31,15 +32,32 @@ void PcSession::ShakeHands()
     Utils::ReportErrorIfNotZero(communicator_->Read(data));
     Utils::ReportErrorIfFalse(data == command);
     communicator_->Write(confirm);
+    communicator_->Write(fire);
+    delay(1000);
+}
+
+void PcSession::WaitMagicKeys()
+{
+//    Serial.println("Wait for magic keys");
+    const Data magicKeyHids = {4, 22, 7}; // a s d
+    for (byte i = 0, count = magicKeyHids.size(); i < count; ) {
+//        Serial.println("Matches: ");
+//        Serial.print(i);
+//        Serial.println("");
+        Keys keys;
+        if (!keyboardManager_->WaitForKeyPress(keys) && keys.size() == 2) {
+            byte pressed = keys.at(0).at(2);
+            if (pressed == magicKeyHids[i]) {
+                ++i;
+                continue;
+            }
+        }
+    }
 }
 
 void PcSession::StartLoop()
 {
-    const Data fire = {'F', 'i', 'r', 'e' , '!'};
     const Data fail = {'F', 'a', 'i', 'l'};
-
-    communicator_->Write(fire);
-    delay(1000);
 
     while(true) {
         Keys keys;
@@ -58,6 +76,7 @@ void PcSession::Run()
 {
     //Utils::ReportErrorIfNotZero(keyboardManager_->InitKeyboard());
     Utils::ReportErrorIfNotZero(communicator_->Open());
-    ShakeHands();
+    //ShakeHands();
+    WaitMagicKeys();
     StartLoop();
 }
