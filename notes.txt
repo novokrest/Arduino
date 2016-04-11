@@ -1,0 +1,7 @@
+usbview
+http://usbview.sourceforge.net
+Graphical display
+of the contents of
+/proc/bus/usb/devices.
+
+http://www.linux­usb.org/usbtree
