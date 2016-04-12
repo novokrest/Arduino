@@ -8,6 +8,7 @@
 #include "Keyboard.h"
 #include "Logger.h"
 #include "Util.h"
+#include "Utils.h"
 #include <exception>
 
 Keyboard::Keyboard(uint16_t vendor, uint16_t product) : ctx_(NULL), devh_(NULL), vendor_(vendor), product_(product)
@@ -58,19 +59,23 @@ void Keyboard::Open()
 void Keyboard::Receive()
 {
 	int count, result;
-	unsigned char data[8];
+	Data data(8), decrypted(8);
+
 	if (epType_ == ENDPOINT_BULK_TYPE) {
-		result = libusb_bulk_transfer(devh_, (epNumber_ | epDirection_), data, sizeof(data), &count, 0);
+		result = libusb_bulk_transfer(devh_, (epNumber_ | epDirection_), (unsigned char*)&data.front(), data.size(), &count, 0);
 	}
 	else {
-		result = libusb_interrupt_transfer(devh_, (epNumber_ | epDirection_), data, sizeof(data), &count, 0);
+		result = libusb_interrupt_transfer(devh_, (epNumber_ | epDirection_), (unsigned char*)&data.front(), data.size(), &count, 0);
 	}
 	if (result) {
 		throw LibUsbException("Transfer error!");
 	}
 
+	cryptor.Decrypt(data, decrypted);
+
 	Logger::Log(std::string("Count: ") + std::to_string(count));
-	Logger::Log(Util::CharsToIntString(data, sizeof(data)));
+	Logger::Log(Utils::ToString(decrypted));
+	//Logger::Log(Util::CharsToIntString(data, sizeof(data)));
 
 }
 

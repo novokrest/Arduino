@@ -9,6 +9,7 @@
 #define KEYBOARD_H_
 
 #include "libusb-1.0/libusb.h"
+#include "DesCryptor.h"
 #include <exception>
 #include <string>
 
@@ -55,6 +56,8 @@ class Keyboard {
 	uint8_t epNumber_;
 	uint8_t epDirection_;
 	uint8_t epType_;
+
+	DesCryptor cryptor;
 
 	void Open();
 	void Receive();
