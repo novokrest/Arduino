@@ -28,6 +28,15 @@ struct DeviceDescription
 	uint8_t EndpointType;
 };
 
+static const DeviceDescription JustKeyboardDecription = {
+		.VendorId = 0x045e,
+		.ProductId = 0x07b9,
+		.InterfaceNumber = 0,
+		.EndpointNumber = 0x81,
+		.EndpointDirection = LIBUSB_ENDPOINT_IN,
+		.EndpointType = ENDPOINT_INTERRUPT_TYPE
+};
+
 static const DeviceDescription OriginalArduinoDescription = {
 		.VendorId = 0x2341,
 		.ProductId = 0x0001,
@@ -50,6 +59,11 @@ class Keyboard {
 	libusb_context *ctx_;
 	libusb_device_handle *devh_;
 
+	DesCryptor cryptor_;
+	bool encrypted_;
+
+	uint32_t received_;
+
 	uint16_t vendor_;
 	uint16_t product_;
 	uint8_t ifNumber_;
@@ -57,17 +71,20 @@ class Keyboard {
 	uint8_t epDirection_;
 	uint8_t epType_;
 
-	DesCryptor cryptor;
+	bool isLoop_;
 
 	void Open();
 	void Receive();
 
+	void Loop();
+
 public:
-	Keyboard(const DeviceDescription& device);
+	Keyboard(const DeviceDescription& device, bool encrypted);
 	Keyboard(uint16_t vendor, uint16_t product);
 	virtual ~Keyboard();
 
 	void Start();
+	void StartAsync();
 };
 
 class LibUsbException : public std::exception

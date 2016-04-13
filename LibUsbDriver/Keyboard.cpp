@@ -20,8 +20,8 @@ Keyboard::Keyboard(uint16_t vendor, uint16_t product) : ctx_(NULL), devh_(NULL),
 	}
 }
 
-Keyboard::Keyboard(const DeviceDescription& device)
-	: ctx_(NULL), devh_(NULL)
+Keyboard::Keyboard(const DeviceDescription& device, bool encrypted)
+	: ctx_(NULL), devh_(NULL), encrypted_(encrypted), received_(0)
 	, vendor_(device.VendorId)
 	, product_(device.ProductId)
 	, ifNumber_(device.InterfaceNumber)
@@ -71,12 +71,12 @@ void Keyboard::Receive()
 		throw LibUsbException("Transfer error!");
 	}
 
-	cryptor.Decrypt(data, decrypted);
+	if (encrypted_) {
+		cryptor_.Decrypt(data, data);
+	}
 
-	Logger::Log(std::string("Count: ") + std::to_string(count));
-	Logger::Log(Utils::ToString(decrypted));
-	//Logger::Log(Util::CharsToIntString(data, sizeof(data)));
-
+	Logger::Log(std::string("Id: ") + std::to_string(received_));
+	Logger::Log(std::string("Count ") + std::to_string(count) + ": " + Utils::ToString(data));
 }
 
 void Keyboard::Start()
@@ -84,7 +84,21 @@ void Keyboard::Start()
 	Open();
 	while(true) {
 		Receive();
+		++received_;
 	}
+}
+
+void Keyboard::Loop()
+{
+	isLoop_ = true;
+	while (isLoop_) {
+		libusb_handle_events(ctx_);
+	}
+}
+
+void Keyboard::StartAsync()
+{
+
 }
 
 Keyboard::~Keyboard()
