@@ -14,28 +14,28 @@ Circuits At Home, LTD
 Web      :  http://www.circuitsathome.com
 e-mail   :  support@circuitsathome.com
  */
-/* USB functions */
-#ifndef _usb_h_
-#define _usb_h_
+#if !defined(_usb_h_) || defined(__SINK_PARSER_H__)
+#error "Never include hexdump.h directly; include Usb.h instead"
+#else
+#define __SINK_PARSER_H__
 
-// WARNING: Do not change the order of includes, or stuff will break!
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdio.h>
+extern int UsbDEBUGlvl;
 
-// None of these should ever be included by a driver, or a user's sketch.
-#include "settings.h"
-#include "printhex.h"
-#include "message.h"
-#include "hexdump.h"
-#include "sink_parser.h"
-#include "max3421e.h"
-#include "address.h"
-#include "avrpins.h"
-#include "usb_ch9.h"
-#include "usbhost.h"
-#include "UsbCore.h"
-#include "parsetools.h"
-#include "confdescparser.h"
+// This parser does absolutely nothing with the data, just swallows it.
 
-#endif //_usb_h_
+template <class BASE_CLASS, class LEN_TYPE, class OFFSET_TYPE>
+class SinkParser : public BASE_CLASS {
+public:
+
+        SinkParser() {
+        };
+
+        void Initialize() {
+        };
+
+        void Parse(const LEN_TYPE len, const uint8_t *pbuf, const OFFSET_TYPE &offset) {
+        };
+};
+
+
+#endif // __HEXDUMP_H__
