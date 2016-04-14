@@ -28,7 +28,7 @@ struct DeviceDescription
 	uint8_t EndpointType;
 };
 
-static const DeviceDescription JustKeyboardDecription = {
+static const DeviceDescription JustKeyboardDescription = {
 		.VendorId = 0x045e,
 		.ProductId = 0x07b9,
 		.InterfaceNumber = 0,
@@ -37,7 +37,7 @@ static const DeviceDescription JustKeyboardDecription = {
 		.EndpointType = ENDPOINT_INTERRUPT_TYPE
 };
 
-static const DeviceDescription OriginalArduinoDescription = {
+static const DeviceDescription JustArduinoDescription = {
 		.VendorId = 0x2341,
 		.ProductId = 0x0001,
 		.InterfaceNumber = 1,

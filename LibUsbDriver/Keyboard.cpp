@@ -62,6 +62,7 @@ void Keyboard::Receive()
 	Data data(8), decrypted(8);
 
 	if (epType_ == ENDPOINT_BULK_TYPE) {
+		data.resize(30);
 		result = libusb_bulk_transfer(devh_, (epNumber_ | epDirection_), (unsigned char*)&data.front(), data.size(), &count, 0);
 	}
 	else {

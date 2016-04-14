@@ -18,6 +18,7 @@ enum class EncryptionMode
 enum class DeviceType
 {
 	JUST_KEYBOARD = 0,
+	JUST_ARDUINO,
 	ARDUINO_KEYBOARD,
 	NONE
 };
@@ -46,6 +47,7 @@ struct Arguments
 
 		static const std::string DeviceToString[] = {
 				[DeviceType::JUST_KEYBOARD] = "just-keyboard",
+				[DeviceType::JUST_ARDUINO] = "just-arduino",
 				[DeviceType::ARDUINO_KEYBOARD] = "arduino-keyboard",
 				[DeviceType::NONE] = "none"
 		};
@@ -63,6 +65,7 @@ static Arguments ParseArguments(int argc, char * const argv[])
 {
 	static const std::string DeviceFlagToDeviceType[] = {
 			[DeviceType::JUST_KEYBOARD] = "jk",
+			[DeviceType::JUST_ARDUINO] = "ja",
 			[DeviceType::ARDUINO_KEYBOARD] = "ak",
 			[DeviceType::NONE] = "none"
 	};
@@ -107,7 +110,12 @@ int main(int argc, char * const argv[])
 
 	//Keyboard keyboard(ArduinoKeyboardDescription);
 	if (arguments.Device == DeviceType::JUST_KEYBOARD) {
-		Keyboard keyboard(JustKeyboardDecription, arguments.Encryption == EncryptionMode::REQUIRED);
+		Keyboard keyboard(JustKeyboardDescription, arguments.Encryption == EncryptionMode::REQUIRED);
+		keyboard.Start();
+	}
+
+	else if (arguments.Device == DeviceType::JUST_ARDUINO) {
+		Keyboard keyboard(JustArduinoDescription, arguments.Encryption == EncryptionMode::REQUIRED);
 		keyboard.Start();
 	}
 
