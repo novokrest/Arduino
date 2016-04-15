@@ -55,9 +55,19 @@ static const DeviceDescription ArduinoKeyboardDescription = {
 		.EndpointType = ENDPOINT_INTERRUPT_TYPE
 };
 
+enum class DeviceState
+{
+	PLUGGED,
+	UNPLUGGED
+};
+
 class Keyboard {
 	libusb_context *ctx_;
 	libusb_device_handle *devh_;
+	libusb_hotplug_callback_handle handle_;
+	Data data_;
+
+	DeviceState state_;
 
 	DesCryptor cryptor_;
 	bool encrypted_;
@@ -73,14 +83,28 @@ class Keyboard {
 
 	bool isLoop_;
 
+	bool RegisterHotplug();
+
 	void Open();
+	void Close();
 	void Receive();
+
+	void SubmitTransfer();
+	void OnTransferCompleted(libusb_transfer *transfer);
+	void OnTransferFailed(libusb_transfer *transfer);
 
 	void Loop();
 
+	static int dispatch_hotplug_callback(libusb_context *ctx, libusb_device *dev,
+	                                     libusb_hotplug_event event, void *user_data);
+
+	static void transfer_callback(libusb_transfer *transfer);
+
+	void OnArrived(libusb_device *dev, libusb_hotplug_event event);
+	void OnLeft(libusb_device *dev, libusb_hotplug_event event);
+
 public:
 	Keyboard(const DeviceDescription& device, bool encrypted);
-	Keyboard(uint16_t vendor, uint16_t product);
 	virtual ~Keyboard();
 
 	void Start();

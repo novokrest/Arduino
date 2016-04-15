@@ -17,6 +17,6 @@
 #define ARDUINO_END_DATA_KEY_INT    (int)131
 
 
-typedef std::vector<char> Data;
+typedef std::vector<unsigned char> Data;
 
 #endif // COMMON_H

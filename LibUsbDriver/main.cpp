@@ -7,6 +7,7 @@
 
 #include "Keyboard.h"
 #include "Logger.h"
+#include "HotplugDetector.h"
 #include <unistd.h>
 
 enum class EncryptionMode
@@ -105,23 +106,27 @@ static Arguments ParseArguments(int argc, char * const argv[])
 
 int main(int argc, char * const argv[])
 {
+//	HotplugDetector detector;
+//	detector.Detect();
+//	return 0;
+
 	Arguments arguments = ParseArguments(argc, argv);
 	Logger::Log(arguments.ToString());
 
 	//Keyboard keyboard(ArduinoKeyboardDescription);
 	if (arguments.Device == DeviceType::JUST_KEYBOARD) {
 		Keyboard keyboard(JustKeyboardDescription, arguments.Encryption == EncryptionMode::REQUIRED);
-		keyboard.Start();
+		keyboard.StartAsync();
 	}
 
 	else if (arguments.Device == DeviceType::JUST_ARDUINO) {
 		Keyboard keyboard(JustArduinoDescription, arguments.Encryption == EncryptionMode::REQUIRED);
-		keyboard.Start();
+		keyboard.StartAsync();
 	}
 
 	else if (arguments.Device == DeviceType::ARDUINO_KEYBOARD) {
 		Keyboard keyboard(ArduinoKeyboardDescription, arguments.Encryption == EncryptionMode::REQUIRED);
-		keyboard.Start();
+		keyboard.StartAsync();
 	}
 
 	Logger::Log("Nothing");
