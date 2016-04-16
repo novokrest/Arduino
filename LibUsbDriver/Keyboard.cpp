@@ -6,10 +6,10 @@
  */
 
 #include "Keyboard.h"
+#include "Exceptions.h"
 #include "Logger.h"
 #include "Util.h"
 #include "Utils.h"
-#include <exception>
 #include <cassert>
 
 
@@ -189,9 +189,6 @@ void Keyboard::SubmitTransfer()
 		return;
 	}
 
-	int size = data_.size();
-	unsigned char *f = &data_.front();
-
 	if (epType_ == ENDPOINT_BULK_TYPE) {
 		libusb_fill_bulk_transfer(transfer, devh_, (epNumber_ | epDirection_), &data_.front(), data_.size(), &Keyboard::transfer_callback, this, 0);
 	}
@@ -239,20 +236,5 @@ Keyboard::~Keyboard()
 	if (ctx_ != NULL) {
 		libusb_exit(ctx_);
 	}
-}
-
-LibUsbException::LibUsbException(const std::string &message)
-	: message_(message)
-{
-
-}
-
-LibUsbException::~LibUsbException() throw()
-{
-}
-
-const char *LibUsbException::what() const throw()
-{
-	return message_.c_str();
 }
 

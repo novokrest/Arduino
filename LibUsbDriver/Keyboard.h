@@ -111,15 +111,4 @@ public:
 	void StartAsync();
 };
 
-class LibUsbException : public std::exception
-{
-private:
-	const std::string message_;
-
-public:
-	LibUsbException(const std::string &message);
-	virtual ~LibUsbException() throw();
-	virtual const char *what() const throw();
-};
-
 #endif /* KEYBOARD_H_ */
