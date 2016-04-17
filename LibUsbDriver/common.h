@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <vector>
+#include <set>
 #include <string>
 #include <sstream>
 #include <exception>
@@ -19,5 +20,11 @@
 #define KEYBOARD_BOOT_PROTOCOL_MESSAGE_SIZE 8
 
 typedef std::vector<unsigned char> Data;
+typedef std::vector<uint8_t> Uint8Vec;
+
+typedef Uint8Vec KeyCodesVec;
+
+enum class KeyboardKey;
+typedef std::set<KeyboardKey> KeySet;
 
 #endif // COMMON_H

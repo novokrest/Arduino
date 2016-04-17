@@ -10,20 +10,16 @@
 
 #include "UsbDevice.h"
 #include "DesCryptor.h"
+#include "KeyCodes.h"
 #include <exception>
 #include <string>
-
-
-enum class DeviceState
-{
-	PLUGGED,
-	UNPLUGGED
-};
-
+#include <set>
 
 /**
  * This structure has been obtained form UsbHostShiel/hidboot.h
  * */
+
+//TODO: Split in two structures
 class KeyboardState {
 	struct {
 			uint8_t bmLeftCtrl : 1;
@@ -38,9 +34,14 @@ class KeyboardState {
 	uint8_t bReserved;
 	uint8_t keys[6];
 
+	KeySet keySet_;
+
 public:
 	KeyboardState();
 	KeyboardState(const Data& data);
+
+	const KeySet& Keys() const;
+
 	std::string ToString() const;
 };
 
@@ -75,13 +76,28 @@ public:
 	void Start();
 };
 
+class KeysReport
+{
+	KeySet pressed_;
+	KeySet released_;
+
+public:
+	KeysReport(const KeySet& pressed, const KeySet& released);
+
+	const KeySet& Pressed() const;
+	const KeySet& Released() const;
+};
+
 class KeyboardStateTracker
 {
 	KeyboardState prev_;
 
+	KeySet pressed_;
+	KeySet released_;
+
 public:
 	KeyboardStateTracker();
-	void UpdateKeyboardState(const Data& data);
+	KeysReport UpdateKeyboardState(const KeyboardState& state);
 };
 
 

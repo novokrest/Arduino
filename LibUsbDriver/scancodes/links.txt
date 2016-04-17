@@ -1,0 +1,14 @@
+USB HID to PS/2 Scan Code Translation Table
+http://www.hiemalis.org/~keiji/PC/scancode-translate.pdf
+
+Device Class Definition 
+for Human Interface 
+Devices (HID) 
+http://www.usb.org/developers/hidpage/HID1_11.pdf
+
+HID Usage Tables
+http://www.usb.org/developers/hidpage/Hut1_12v2.pdf
+
+Other
+http://www.mindrunway.ru/IgorPlHex/USBKeyScan.pdf
+http://stackoverflow.com/questions/27075328/list-of-hex-keyboard-scan-codes-and-usb-hid-keyboard-documentation

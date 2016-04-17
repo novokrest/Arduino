@@ -18,7 +18,7 @@ VBoxProxy::~VBoxProxy()
 {
 }
 
-void VBoxProxy::PutScancodes(const Data& scancodes)
+void VBoxProxy::PutScancodes(const KeyCodesVec& scancodes)
 {
 	std::stringstream command;
 
@@ -39,5 +39,18 @@ VBoxKeyboardConnector::~VBoxKeyboardConnector()
 
 void VBoxKeyboardConnector::OnKeyboardStateChanged(const KeyboardState& state)
 {
+	KeysReport report = keyboardTracker_.UpdateKeyboardState(state);
+	KeyCodesVec scancodes;
 
+	for (auto& key: report.Released()) {
+		KeyCodesVec scancode = KeyCodesConverter::ConvertToPS2Set1Scancodes(key, false);
+		scancodes.insert(scancodes.begin(), scancode.begin(), scancode.end());
+	}
+
+	for (auto& key: report.Pressed()) {
+		KeyCodesVec scancode = KeyCodesConverter::ConvertToPS2Set1Scancodes(key, true);
+		scancodes.insert(scancodes.begin(), scancode.begin(), scancode.end());
+	}
+
+	vboxProxy_.PutScancodes(scancodes);
 }
