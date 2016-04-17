@@ -21,6 +21,7 @@
 
 typedef std::vector<unsigned char> Data;
 typedef std::vector<uint8_t> Uint8Vec;
+typedef uint8_t KeyCode;
 
 typedef Uint8Vec KeyCodesVec;
 

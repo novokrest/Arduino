@@ -6,6 +6,7 @@
  */
 
 #include "VBoxProxy.h"
+#include "Logger.h"
 #include "Utils.h"
 #include <sstream>
 

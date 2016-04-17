@@ -62,7 +62,7 @@ class Keyboard : public HotPluggableUsbDevice
 
 	KeyboardState state_;
 
-	void KeyboardStateChanged();
+	void KeyboardStateChanged(const KeyboardState& state);
 
 protected:
 	virtual void OnDataReceived(const Data& data) override;
@@ -82,7 +82,10 @@ class KeysReport
 	KeySet released_;
 
 public:
+	KeysReport();
 	KeysReport(const KeySet& pressed, const KeySet& released);
+	KeysReport(const KeysReport& report);
+	KeysReport& operator=(const KeysReport& report);
 
 	const KeySet& Pressed() const;
 	const KeySet& Released() const;

@@ -112,14 +112,15 @@ enum class KeyboardKey
 	LeftAlt, RightAlt,
 	LeftShift, RightShift,
 	LeftGUI, RightGUI,
+	NONE
 };
 
 class KeyCodesConverter {
 public:
 	static KeyCodesVec ConvertToPS2Set1Scancodes(KeyboardKey key, bool isPressed);
 
-	static KeyCodesVec ConvertToHidUsageIds(KeyboardKey key);
-	static KeyCodesVec ConvertToPS2Set1(KeyboardKey key);
+	static KeyCode ConvertToHidUsageId(KeyboardKey key);
+	static KeyboardKey ConvertFromHidUsageId(KeyCode hid);
 };
 
 #endif /* KEYCODES_H_ */
