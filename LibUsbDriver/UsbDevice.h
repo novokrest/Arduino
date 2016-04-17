@@ -12,6 +12,8 @@
 #include "LibUsbContext.h"
 #include "UsbDeviceListener.h"
 #include "HotplugDetector.h"
+#include "DesCryptor.h"
+#include <memory>
 
 #define ENDPOINT_CONTROL_TYPE       0x00
 #define ENDPOINT_ISOCHRONOUS_TYPE   0x01
@@ -46,6 +48,10 @@ class UsbDevice {
 	uint8_t epDirection_;
 	uint8_t epType_;
 
+	bool encrypted_;
+	std::unique_ptr<DesCryptor> cryptor_;
+
+
 	TransferState lastTransferState_;
 
 	static void transfer_callback(libusb_transfer *transfer);
@@ -62,7 +68,7 @@ protected:
 	virtual void OnDataReceived(const Data& data) = 0;
 
 public:
-	UsbDevice(LibUsbContext& ctx, const DeviceDescription& device);
+	UsbDevice(LibUsbContext& ctx, const DeviceDescription& device, bool encrypted);
 	virtual ~UsbDevice();
 };
 
@@ -71,7 +77,7 @@ class HotPluggableUsbDevice : public UsbDevice
 	HotPlugDetector *detector_;
 
 public:
-	HotPluggableUsbDevice(LibUsbContext& ctx, const DeviceDescription& device);
+	HotPluggableUsbDevice(LibUsbContext& ctx, const DeviceDescription& device, bool encrypted);
 	virtual ~HotPluggableUsbDevice() override;
 
 	void WaitForArrived();

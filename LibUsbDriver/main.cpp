@@ -118,7 +118,7 @@ int main(int argc, char * const argv[])
 	LibUsbContext context;
 	VBoxProxy vbox("UbuntuGuest1");
 	VBoxKeyboardConnector connector(vbox);
-	std::unique_ptr<Keyboard> keyboard (DevicesCreator::Create(context, arguments.Device));
+	std::unique_ptr<Keyboard> keyboard (DevicesCreator::Create(context, arguments.Device, arguments.Encryption == EncryptionMode::REQUIRED));
 
 	keyboard->AddObserver(&connector);
 

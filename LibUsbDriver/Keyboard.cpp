@@ -13,8 +13,8 @@
 #include <cstring>
 
 
-Keyboard::Keyboard(LibUsbContext& ctx, const DeviceDescription& device)
-	: HotPluggableUsbDevice(ctx, device)
+Keyboard::Keyboard(LibUsbContext& ctx, const DeviceDescription& device, bool encrypted)
+	: HotPluggableUsbDevice(ctx, device, encrypted)
 {
 }
 

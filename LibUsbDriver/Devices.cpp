@@ -37,18 +37,18 @@ static const DeviceDescription ArduinoKeyboardDescription = {
 };
 
 //TODO: Implement move-contructors
-Keyboard* DevicesCreator::Create(LibUsbContext& ctx, DeviceType device)
+Keyboard* DevicesCreator::Create(LibUsbContext& ctx, DeviceType device, bool encrypted)
 {
 	switch(device) {
 
 	case DeviceType::JUST_KEYBOARD:
-		return CreateJustKeyboard(ctx);
+		return CreateJustKeyboard(ctx, encrypted);
 
 	case DeviceType::JUST_ARDUINO:
-		return CreateJustArduino(ctx);
+		return CreateJustArduino(ctx, encrypted);
 
 	case DeviceType::ARDUINO_KEYBOARD:
-		return CreateArduinoKeyboard(ctx);
+		return CreateArduinoKeyboard(ctx, encrypted);
 
 	default:
 		Verifiers::Verify(false, "Unknown device type: " + std::to_string((int)device));
@@ -57,17 +57,17 @@ Keyboard* DevicesCreator::Create(LibUsbContext& ctx, DeviceType device)
 	return NULL;
 }
 
-Keyboard* DevicesCreator::CreateJustKeyboard(LibUsbContext& ctx)
+Keyboard* DevicesCreator::CreateJustKeyboard(LibUsbContext& ctx, bool encrypted)
 {
-	return new Keyboard(ctx, JustKeyboardDescription);
+	return new Keyboard(ctx, JustKeyboardDescription, encrypted);
 }
 
-Keyboard* DevicesCreator::CreateJustArduino(LibUsbContext& ctx)
+Keyboard* DevicesCreator::CreateJustArduino(LibUsbContext& ctx, bool encrypted)
 {
-	return new Keyboard(ctx, JustArduinoDescription);
+	return new Keyboard(ctx, JustArduinoDescription, encrypted);
 }
 
-Keyboard* DevicesCreator::CreateArduinoKeyboard(LibUsbContext& ctx)
+Keyboard* DevicesCreator::CreateArduinoKeyboard(LibUsbContext& ctx, bool encrypted)
 {
-	return new Keyboard(ctx, ArduinoKeyboardDescription);
+	return new Keyboard(ctx, ArduinoKeyboardDescription, encrypted);
 }

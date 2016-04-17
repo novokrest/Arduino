@@ -10,7 +10,7 @@
 #include "Exceptions.h"
 #include "Verifiers.h"
 
-UsbDevice::UsbDevice(LibUsbContext &ctx, const DeviceDescription& device)
+UsbDevice::UsbDevice(LibUsbContext &ctx, const DeviceDescription& device, bool encrypted)
 	: ctx_(ctx), devh_(NULL)
 	, vendor_(device.VendorId)
 	, product_(device.ProductId)
@@ -18,8 +18,9 @@ UsbDevice::UsbDevice(LibUsbContext &ctx, const DeviceDescription& device)
 	, epNumber_(device.EndpointNumber)
 	, epDirection_(device.EndpointDirection)
 	, epType_(device.EndpointType)
+	, encrypted_(encrypted)
+	, cryptor_(encrypted ? new DesCryptor() : nullptr)
 {
-
 }
 
 void UsbDevice::Open()
@@ -110,6 +111,10 @@ void UsbDevice::ReceiveData(size_t dataSize)
 	SubmitTransfer(data);
 	if (lastTransferState_ == TransferState::COMPLETED) {
 		Logger::Log("Data has been received");
+		if (encrypted_) {
+			cryptor_->Decrypt(data, data);
+		}
+
 		OnDataReceived(data);
 	}
 }
@@ -141,8 +146,8 @@ UsbDevice::~UsbDevice() {
 }
 
 
-HotPluggableUsbDevice::HotPluggableUsbDevice(LibUsbContext& ctx, const DeviceDescription& device)
-	: UsbDevice(ctx, device)
+HotPluggableUsbDevice::HotPluggableUsbDevice(LibUsbContext& ctx, const DeviceDescription& device, bool encrypted)
+	: UsbDevice(ctx, device, encrypted)
 	, detector_(new HotPlugDetector(ctx, device.VendorId, device.ProductId))
 {
 

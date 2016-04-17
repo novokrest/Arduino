@@ -22,12 +22,12 @@ class DevicesCreator {
 	DevicesCreator() = delete;
 	~DevicesCreator() = delete;
 
-	static Keyboard* CreateJustKeyboard(LibUsbContext& ctx);
-	static Keyboard* CreateJustArduino(LibUsbContext& ctx);
-	static Keyboard* CreateArduinoKeyboard(LibUsbContext& ctx);
+	static Keyboard* CreateJustKeyboard(LibUsbContext& ctx, bool encrypted);
+	static Keyboard* CreateJustArduino(LibUsbContext& ctx, bool encrypted);
+	static Keyboard* CreateArduinoKeyboard(LibUsbContext& ctx, bool encrypted);
 
 public:
-	static Keyboard* Create(LibUsbContext& ctx, DeviceType device);
+	static Keyboard* Create(LibUsbContext& ctx, DeviceType device, bool encrypted);
 };
 
 #endif /* DEVICES_H_ */

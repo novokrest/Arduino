@@ -55,6 +55,7 @@ public:
 	virtual void OnKeyboardStateChanged(const KeyboardState& state) = 0;
 };
 
+
 class Keyboard : public HotPluggableUsbDevice
 {
 	typedef std::vector<KeyboardObserver*> KeyboardObservers;
@@ -68,7 +69,7 @@ protected:
 	virtual void OnDataReceived(const Data& data) override;
 
 public:
-	Keyboard(LibUsbContext& ctx, const DeviceDescription& device);
+	Keyboard(LibUsbContext& ctx, const DeviceDescription& device, bool encrypted);
 	virtual ~Keyboard();
 
 	void AddObserver(KeyboardObserver *observer);
