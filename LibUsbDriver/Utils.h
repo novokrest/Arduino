@@ -12,8 +12,11 @@ private:
     Utils& operator=(const Utils &utils) = delete;
 
 public:
+    static std::string ToString(const uint8_t* data, size_t size);
     static std::string ToString(Data const &data);
     static std::string ToCharString(const Data& data);
+	static std::string CharsToIntString(unsigned char *data, size_t size);
+	static std::string ToHexString(const Data& data, const std::string& delimiter);
     static void ToData(const std::string& str, Data& data);
     static Data ToData(const std::string& str);
 };

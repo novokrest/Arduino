@@ -11,11 +11,12 @@
 #include <string>
 
 class Logger {
-public:
 	Logger();
-	virtual ~Logger();
+	~Logger();
 
+public:
 	static void Log(std::string const& message);
+	static void LogError(std::string const& message);
 };
 
 #endif /* LOGGER_H_ */

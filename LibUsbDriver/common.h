@@ -16,6 +16,7 @@
 #define ARDUINO_START_DATA_KEY_INT  (int)131
 #define ARDUINO_END_DATA_KEY_INT    (int)131
 
+#define KEYBOARD_BOOT_PROTOCOL_MESSAGE_SIZE 8
 
 typedef std::vector<unsigned char> Data;
 

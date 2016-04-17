@@ -8,7 +8,10 @@
 #include "Keyboard.h"
 #include "Logger.h"
 #include "HotplugDetector.h"
+#include "Devices.h"
+#include "VBoxProxy.h"
 #include <unistd.h>
+#include <memory>
 
 enum class EncryptionMode
 {
@@ -16,18 +19,11 @@ enum class EncryptionMode
 	NONE
 };
 
-enum class DeviceType
-{
-	JUST_KEYBOARD = 0,
-	JUST_ARDUINO,
-	ARDUINO_KEYBOARD,
-	NONE
-};
-
 struct Arguments
 {
 	EncryptionMode Encryption;
 	DeviceType Device;
+	std::string VirtualBoxGuestName;
 
 	static Arguments Default()
 	{
@@ -55,8 +51,9 @@ struct Arguments
 
 		std::stringstream ss;
 
-		ss << "Device: " << DeviceToString[(int)Device];
-		ss << ", encryption: " <<  EncryptionToString[(int)Encryption];
+		ss << "Device: " << DeviceToString[(int)Device]
+		   << ", encryption: " <<  EncryptionToString[(int)Encryption]
+		   << ", guest: " << VirtualBoxGuestName;
 
 		return ss.str();
 	}
@@ -64,7 +61,7 @@ struct Arguments
 
 static Arguments ParseArguments(int argc, char * const argv[])
 {
-	static const std::string DeviceFlagToDeviceType[] = {
+	static const std::string DeviceToDeviceType[] = {
 			[DeviceType::JUST_KEYBOARD] = "jk",
 			[DeviceType::JUST_ARDUINO] = "ja",
 			[DeviceType::ARDUINO_KEYBOARD] = "ak",
@@ -75,8 +72,10 @@ static Arguments ParseArguments(int argc, char * const argv[])
 
 	int opt;
 	bool encryptionRequired = false;
-	std::string deviceCode;
-	while ((opt = getopt(argc, argv, "et:")) != -1){
+	std::string device;
+	std::string vbGuestName;
+
+	while ((opt = getopt(argc, argv, "et:g:")) != -1){
 		switch(opt){
 		case 'e':
 			encryptionRequired = true;
@@ -84,9 +83,13 @@ static Arguments ParseArguments(int argc, char * const argv[])
 			break;
 
 		case 't':
-			deviceCode = optarg;
-			Logger::Log("Device: " + deviceCode);
+			device = optarg;
+			Logger::Log("Device: " + device);
 			break;
+
+		case 'g':
+			vbGuestName = optarg;
+			Logger::Log("VirtualBox guest name: " + vbGuestName);
 
 		case '?':
 			Logger::Log("Unknown option: " + std::to_string(opt));
@@ -95,41 +98,36 @@ static Arguments ParseArguments(int argc, char * const argv[])
 	};
 
 	arguments.Encryption = encryptionRequired ? EncryptionMode::REQUIRED : EncryptionMode::NONE;
-	for (int device = 0, none = (int)DeviceType::NONE; device < none; ++device) {
-		if (DeviceFlagToDeviceType[device] == deviceCode) {
-			arguments.Device = (DeviceType)device;
+	for (int deviceType = 0, none = (int)DeviceType::NONE; deviceType < none; ++deviceType) {
+		if (DeviceToDeviceType[deviceType] == device) {
+			arguments.Device = (DeviceType)deviceType;
 		}
 	}
+	arguments.VirtualBoxGuestName = vbGuestName;
 
 	return arguments;
 }
 
+//TODO: use auto-ptr
 int main(int argc, char * const argv[])
 {
-//	HotplugDetector detector;
-//	detector.Detect();
-//	return 0;
-
+	//test();return 0;
 	Arguments arguments = ParseArguments(argc, argv);
 	Logger::Log(arguments.ToString());
 
-	//Keyboard keyboard(ArduinoKeyboardDescription);
-	if (arguments.Device == DeviceType::JUST_KEYBOARD) {
-		Keyboard keyboard(JustKeyboardDescription, arguments.Encryption == EncryptionMode::REQUIRED);
-		keyboard.StartAsync();
-	}
+	LibUsbContext context;
+	VBoxProxy vbox("UbuntuGuest1");
+	VBoxKeyboardConnector connector(vbox);
+	std::unique_ptr<Keyboard> keyboard (DevicesCreator::Create(context, arguments.Device));
 
-	else if (arguments.Device == DeviceType::JUST_ARDUINO) {
-		Keyboard keyboard(JustArduinoDescription, arguments.Encryption == EncryptionMode::REQUIRED);
-		keyboard.StartAsync();
-	}
+	keyboard->AddObserver(&connector);
 
-	else if (arguments.Device == DeviceType::ARDUINO_KEYBOARD) {
-		Keyboard keyboard(ArduinoKeyboardDescription, arguments.Encryption == EncryptionMode::REQUIRED);
-		keyboard.StartAsync();
+	try{
+		keyboard->Start();
 	}
-
-	Logger::Log("Nothing");
+	catch (std::exception& exception) {
+		Logger::LogError(exception.what());
+	}
 
 	return 0;
 }

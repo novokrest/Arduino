@@ -8,17 +8,21 @@
 #include "Logger.h"
 #include <iostream>
 
-Logger::Logger() {
-	// TODO Auto-generated constructor stub
-
+Logger::Logger()
+{
 }
 
-Logger::~Logger() {
-	// TODO Auto-generated destructor stub
+Logger::~Logger()
+{
 }
 
 void Logger::Log(const std::string& message)
 {
 	std::cout << message << std::endl;
+}
+
+void Logger::LogError(const std::string& message)
+{
+	std::cout << "Error: " << message << std::endl;
 }
 
