@@ -116,7 +116,7 @@ int main(int argc, char * const argv[])
 	Logger::Log(arguments.ToString());
 
 	LibUsbContext context;
-	VBoxProxy vbox("UbuntuGuest1");
+	VBoxProxy vbox(arguments.VirtualBoxGuestName);
 	VBoxKeyboardConnector connector(vbox);
 	std::unique_ptr<Keyboard> keyboard (DevicesCreator::Create(context, arguments.Device, arguments.Encryption == EncryptionMode::REQUIRED));
 
