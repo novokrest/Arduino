@@ -12,8 +12,20 @@
 #include "CommandExecutor.h"
 #include "UsbDeviceListener.h"
 #include "Keyboard.h"
+#include "Mouse.h"
 #include <string>
 
+struct MouseEvent
+{
+	int dx;
+	int dy;
+	int dz;
+	int dw;
+	int buttonState;
+
+public:
+	MouseEvent();
+};
 
 class VBoxProxy
 {
@@ -25,19 +37,21 @@ public:
 	~VBoxProxy();
 
 	void PutScancodes(const Data& scancodes);
+	void PutMouseEvent(const MouseEvent& event);
 };
 
 //TODO: create VBoxProxy?
-class VBoxKeyboardConnector : public KeyboardObserver
+class VBoxMouseKeyboardConnector : public KeyboardObserver, public MouseObserver
 {
 	KeyboardStateTracker keyboardTracker_;
 	VBoxProxy& vboxProxy_;
 
 public:
-	VBoxKeyboardConnector(VBoxProxy &vboxProxy);
-	virtual ~VBoxKeyboardConnector() override;
+	VBoxMouseKeyboardConnector(VBoxProxy &vboxProxy);
+	virtual ~VBoxMouseKeyboardConnector() override;
 
 	void OnKeyboardStateChanged(const KeyboardState& state) override;
+	void OnMouseStateChanged(const MouseState& state) override;
 };
 
 #endif /* VBOXPROXY_H_ */

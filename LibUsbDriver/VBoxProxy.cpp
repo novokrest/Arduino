@@ -29,16 +29,21 @@ void VBoxProxy::PutScancodes(const KeyCodesVec& scancodes)
 	cmdExecutor_.Execute(command.str());
 }
 
-VBoxKeyboardConnector::VBoxKeyboardConnector(VBoxProxy& vboxProxy)
+void VBoxProxy::PutMouseEvent(const MouseEvent& event)
+{
+	Logger::Log("Nothing");
+}
+
+VBoxMouseKeyboardConnector::VBoxMouseKeyboardConnector(VBoxProxy& vboxProxy)
 	: vboxProxy_(vboxProxy)
 {
 }
 
-VBoxKeyboardConnector::~VBoxKeyboardConnector()
+VBoxMouseKeyboardConnector::~VBoxMouseKeyboardConnector()
 {
 }
 
-void VBoxKeyboardConnector::OnKeyboardStateChanged(const KeyboardState& state)
+void VBoxMouseKeyboardConnector::OnKeyboardStateChanged(const KeyboardState& state)
 {
 	KeysReport report = keyboardTracker_.UpdateKeyboardState(state);
 	KeyCodesVec scancodes;
@@ -54,4 +59,28 @@ void VBoxKeyboardConnector::OnKeyboardStateChanged(const KeyboardState& state)
 	}
 
 	vboxProxy_.PutScancodes(scancodes);
+}
+
+//TODO: pass in MouseInfo?
+void VBoxMouseKeyboardConnector::OnMouseStateChanged(const MouseState& state)
+{
+	MouseEvent mouseEvent;
+
+	mouseEvent.dx = state.GetDisplacementX();
+	mouseEvent.dy = state.GetDisplacementY();
+	mouseEvent.buttonState = (state.IsLeftButtonPressed() ? MOUSE_LEFT_BUTTON_MASK : 0)
+							 | (state.IsRightButtonPressed() ? MOUSE_RIGHT_BUTTON_MASK : 0)
+							 | (state.IsMiddleButtonPressed() ? MOUSE_MIDDLE_BUTTON_MASK : 0);
+
+	vboxProxy_.PutMouseEvent(mouseEvent);
+}
+
+
+/**
+ * MouseEvent
+ * */
+
+MouseEvent::MouseEvent()
+	: dx(0), dy(0), dz(0), dw(0), buttonState(0)
+{
 }

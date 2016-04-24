@@ -24,6 +24,8 @@ struct Arguments
 	EncryptionMode Encryption;
 	DeviceType Device;
 	std::string VirtualBoxGuestName;
+	uint16_t VendorId;
+	uint16_t ProductId;
 
 	static Arguments Default()
 	{
@@ -46,6 +48,7 @@ struct Arguments
 				[DeviceType::JUST_KEYBOARD] = "just-keyboard",
 				[DeviceType::JUST_ARDUINO] = "just-arduino",
 				[DeviceType::ARDUINO_KEYBOARD] = "arduino-keyboard",
+				[DeviceType::ARDUINO_MOUSE] = "arduino-mouse",
 				[DeviceType::NONE] = "none"
 		};
 
@@ -65,6 +68,7 @@ static Arguments ParseArguments(int argc, char * const argv[])
 			[DeviceType::JUST_KEYBOARD] = "jk",
 			[DeviceType::JUST_ARDUINO] = "ja",
 			[DeviceType::ARDUINO_KEYBOARD] = "ak",
+			[DeviceType::ARDUINO_MOUSE] = "am",
 			[DeviceType::NONE] = "none"
 	};
 
@@ -74,8 +78,10 @@ static Arguments ParseArguments(int argc, char * const argv[])
 	bool encryptionRequired = false;
 	std::string device;
 	std::string vbGuestName;
+	uint16_t vendorId = 0;
+	uint16_t productId = 0;
 
-	while ((opt = getopt(argc, argv, "et:g:")) != -1){
+	while ((opt = getopt(argc, argv, "et:g:v:p:")) != -1){
 		switch(opt){
 		case 'e':
 			encryptionRequired = true;
@@ -90,6 +96,15 @@ static Arguments ParseArguments(int argc, char * const argv[])
 		case 'g':
 			vbGuestName = optarg;
 			Logger::Log("VirtualBox guest name: " + vbGuestName);
+			break;
+
+		case 'v':
+			vendorId = std::stoi(optarg);
+			break;
+
+		case 'p':
+			productId = std::stoi(optarg);
+			break;
 
 		case '?':
 			Logger::Log("Unknown option: " + std::to_string(opt));
@@ -98,12 +113,14 @@ static Arguments ParseArguments(int argc, char * const argv[])
 	};
 
 	arguments.Encryption = encryptionRequired ? EncryptionMode::REQUIRED : EncryptionMode::NONE;
+	arguments.VirtualBoxGuestName = vbGuestName;
+	arguments.VendorId = vendorId;
+	arguments.ProductId = productId;
 	for (int deviceType = 0, none = (int)DeviceType::NONE; deviceType < none; ++deviceType) {
 		if (DeviceToDeviceType[deviceType] == device) {
 			arguments.Device = (DeviceType)deviceType;
 		}
 	}
-	arguments.VirtualBoxGuestName = vbGuestName;
 
 	return arguments;
 }
@@ -111,19 +128,18 @@ static Arguments ParseArguments(int argc, char * const argv[])
 //TODO: use auto-ptr
 int main(int argc, char * const argv[])
 {
-	//test();return 0;
 	Arguments arguments = ParseArguments(argc, argv);
 	Logger::Log(arguments.ToString());
 
 	LibUsbContext context;
 	VBoxProxy vbox(arguments.VirtualBoxGuestName);
-	VBoxKeyboardConnector connector(vbox);
-	std::unique_ptr<Keyboard> keyboard (DevicesCreator::Create(context, arguments.Device, arguments.Encryption == EncryptionMode::REQUIRED));
+	VBoxMouseKeyboardConnector connector(vbox);
+	std::unique_ptr<UsbDevice> device (DevicesCreator::Create(context, arguments.Device, arguments.Encryption == EncryptionMode::REQUIRED));
 
-	keyboard->AddObserver(&connector);
+	device->AddObserver(&connector);
 
 	try{
-		keyboard->Start();
+		device->Start();
 	}
 	catch (std::exception& exception) {
 		Logger::LogError(exception.what());

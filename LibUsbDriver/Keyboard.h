@@ -45,7 +45,7 @@ public:
 	std::string ToString() const;
 };
 
-class KeyboardObserver
+class KeyboardObserver : public virtual UsbDeviceObserver
 {
 protected:
 	KeyboardObserver();
@@ -64,6 +64,7 @@ class Keyboard : public HotPluggableUsbDevice
 	KeyboardState state_;
 
 	void KeyboardStateChanged(const KeyboardState& state);
+	void AddKeyboardObserver(KeyboardObserver *observer);
 
 protected:
 	virtual void OnDataReceived(const Data& data) override;
@@ -72,9 +73,9 @@ public:
 	Keyboard(LibUsbContext& ctx, const DeviceDescription& device, bool encrypted);
 	virtual ~Keyboard();
 
-	void AddObserver(KeyboardObserver *observer);
+	void AddObserver(UsbDeviceObserver *observer) override;
 
-	void Start();
+	void Start() override;
 };
 
 class KeysReport

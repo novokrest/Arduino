@@ -9,12 +9,14 @@
 #define DEVICES_H_
 
 #include "Keyboard.h"
+#include "Mouse.h"
 
 enum class DeviceType
 {
 	JUST_KEYBOARD = 0,
 	JUST_ARDUINO,
 	ARDUINO_KEYBOARD,
+	ARDUINO_MOUSE,
 	NONE
 };
 
@@ -25,9 +27,10 @@ class DevicesCreator {
 	static Keyboard* CreateJustKeyboard(LibUsbContext& ctx, bool encrypted);
 	static Keyboard* CreateJustArduino(LibUsbContext& ctx, bool encrypted);
 	static Keyboard* CreateArduinoKeyboard(LibUsbContext& ctx, bool encrypted);
+	static Mouse* CreateArduinoMouse(LibUsbContext& ctx, bool encrypted);
 
 public:
-	static Keyboard* Create(LibUsbContext& ctx, DeviceType device, bool encrypted);
+	static UsbDevice* Create(LibUsbContext& ctx, DeviceType device, bool encrypted);
 };
 
 #endif /* DEVICES_H_ */

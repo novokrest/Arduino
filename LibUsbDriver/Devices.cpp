@@ -36,8 +36,17 @@ static const DeviceDescription ArduinoKeyboardDescription = {
 		.EndpointType = ENDPOINT_INTERRUPT_TYPE
 };
 
+static const DeviceDescription ArduinoMouseDescription = {
+		.VendorId = 0x03eb,
+		.ProductId = 0x2042,
+		.InterfaceNumber = 0,
+		.EndpointNumber = 0x81,
+		.EndpointDirection = LIBUSB_ENDPOINT_IN,
+		.EndpointType = ENDPOINT_INTERRUPT_TYPE
+};
+
 //TODO: Implement move-contructors
-Keyboard* DevicesCreator::Create(LibUsbContext& ctx, DeviceType device, bool encrypted)
+UsbDevice* DevicesCreator::Create(LibUsbContext& ctx, DeviceType device, bool encrypted)
 {
 	switch(device) {
 
@@ -49,6 +58,9 @@ Keyboard* DevicesCreator::Create(LibUsbContext& ctx, DeviceType device, bool enc
 
 	case DeviceType::ARDUINO_KEYBOARD:
 		return CreateArduinoKeyboard(ctx, encrypted);
+
+	case DeviceType::ARDUINO_MOUSE:
+		return CreateArduinoMouse(ctx, encrypted);
 
 	default:
 		Verifiers::Verify(false, "Unknown device type: " + std::to_string((int)device));
@@ -70,4 +82,9 @@ Keyboard* DevicesCreator::CreateJustArduino(LibUsbContext& ctx, bool encrypted)
 Keyboard* DevicesCreator::CreateArduinoKeyboard(LibUsbContext& ctx, bool encrypted)
 {
 	return new Keyboard(ctx, ArduinoKeyboardDescription, encrypted);
+}
+
+Mouse* DevicesCreator::CreateArduinoMouse(LibUsbContext& ctx, bool encrypted)
+{
+	return new Mouse(ctx, ArduinoMouseDescription, encrypted);
 }

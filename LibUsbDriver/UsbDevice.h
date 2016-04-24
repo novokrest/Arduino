@@ -30,6 +30,15 @@ struct DeviceDescription
 	uint8_t EndpointType;
 };
 
+class UsbDeviceObserver
+{
+protected:
+	UsbDeviceObserver() {}
+
+public:
+	virtual ~UsbDeviceObserver() {}
+};
+
 class UsbDevice {
 
 	enum class TransferState {
@@ -70,6 +79,9 @@ protected:
 public:
 	UsbDevice(LibUsbContext& ctx, const DeviceDescription& device, bool encrypted);
 	virtual ~UsbDevice();
+
+	virtual void AddObserver(UsbDeviceObserver *observer) = 0;
+	virtual void Start() = 0;
 };
 
 class HotPluggableUsbDevice : public UsbDevice

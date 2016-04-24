@@ -43,9 +43,15 @@ void Keyboard::KeyboardStateChanged(const KeyboardState& state)
 	}
 }
 
-void Keyboard::AddObserver(KeyboardObserver *observer)
+void Keyboard::AddKeyboardObserver(KeyboardObserver *observer)
 {
 	observers_.push_back(observer);
+}
+
+void Keyboard::AddObserver(UsbDeviceObserver *observer)
+{
+	KeyboardObserver *kObserver = dynamic_cast<KeyboardObserver*>(observer);
+	AddKeyboardObserver(kObserver);
 }
 
 Keyboard::~Keyboard()
